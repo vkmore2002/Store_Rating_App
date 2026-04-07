@@ -9,16 +9,18 @@ const db = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
 });
 
-// Test connection
+// Test connection and handle errors
 db.getConnection((err, connection) => {
   if (err) {
-    console.error("Database connection failed:", err.message);
+    console.error("Database connection error:", err.message);
+    if (process.env.NODE_ENV === "production") {
+      process.exit(1);
+    }
   } else {
     console.log("MySQL Connected Successfully");
     connection.release();

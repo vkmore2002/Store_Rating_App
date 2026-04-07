@@ -16,16 +16,16 @@ const router = express.Router();
 router.post("/", verifyToken, authorizeRoles("admin"), addStore);
 router.delete("/:id", verifyToken, authorizeRoles("admin"), removeStore);
 
-// all authenticated users
-router.get("/", verifyToken, getStores);
-router.get("/:id", verifyToken, getSingleStore);
-
-// store owner
+// store owner (must be before /:id to match correctly)
 router.get(
   "/owner/my-stores",
   verifyToken,
   authorizeRoles("owner"),
   getOwnerStores,
 );
+
+// all authenticated users
+router.get("/", verifyToken, getStores);
+router.get("/:id", verifyToken, getSingleStore);
 
 export default router;

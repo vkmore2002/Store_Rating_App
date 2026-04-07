@@ -10,8 +10,25 @@ dotenv.config();
 
 const app = express();
 
-// middleware
-app.use(cors());
+// CORS configuration
+const allowedOrigins = [
+  process.env.FRONTEND_URL || "http://localhost:5173",
+  "https://shop-ratings-vercel.vercel.app",
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  }),
+);
+
 app.use(express.json());
 
 // routes
@@ -19,9 +36,15 @@ app.use("/api/users", userRoutes);
 app.use("/api/stores", storeRoutes);
 app.use("/api/ratings", ratingRoutes);
 
-// test route
+// health check
 app.get("/", (req, res) => {
-  res.send("API running");
+  res.json({ message: "API running" });
+});
+
+// error handler
+app.use((err, req, res, next) => {
+  console.error("Error:", err.message);
+  res.status(500).json({ message: "Server error" });
 });
 
 const PORT = process.env.PORT || 5000;
